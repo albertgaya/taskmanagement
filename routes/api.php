@@ -22,4 +22,5 @@ Route::post('/users/login', [UserController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/tasks', [TaskController::class, 'store']);
     Route::put('/tasks/{taskId}', [TaskController::class, 'update']);
+    Route::delete('/tasks/{taskId}', [TaskController::class, 'destroy']);
 });

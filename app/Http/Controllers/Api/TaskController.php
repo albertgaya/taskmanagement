@@ -6,7 +6,6 @@ use App\Enums\HttpStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TaskStoreRequest;
 use App\Http\Requests\TaskUpdateRequest;
-use App\Models\Task;
 use App\Services\TaskService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -42,7 +41,10 @@ class TaskController extends Controller
      */
     public function update(int $taskId, TaskUpdateRequest $request): JsonResponse
     {
-        $task = Task::where('user_id', Auth::user()->id)->where('id', $taskId)->first();
+        /** @var User */
+        $user = Auth::user();
+
+        $task = $this->taskService->getUserSingleTask($user, $taskId);
 
         if (!$task) {
             return response()->json(['message' => 'Task doesn\'t exist'], HttpStatusEnum::NOT_FOUND);
@@ -51,5 +53,25 @@ class TaskController extends Controller
         $this->taskService->update($task, $request->all());
 
         return response()->json(['message' => 'Task successfully updated']);
+    }
+
+    /**
+     * @param int $taskId
+     * @return JsonResponse
+     */
+    public function destroy(int $taskId): JsonResponse
+    {
+        /** @var User */
+        $user = Auth::user();
+
+        $task = $this->taskService->getUserSingleTask($user, $taskId);
+
+        if (!$task) {
+            return response()->json(['message' => 'Task doesn\'t exist'], HttpStatusEnum::NOT_FOUND);
+        }
+
+        $this->taskService->destroy($task);
+
+        return response()->json(['message' => 'Task successfully deleted']);
     }
 }
