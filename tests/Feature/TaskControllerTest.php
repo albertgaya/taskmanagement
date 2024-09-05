@@ -199,4 +199,38 @@ class TaskControllerTest extends TestCase
         $response->assertStatus(HttpStatusEnum::NOT_FOUND);
         $response->assertJsonFragment(['message' => 'Task doesn\'t exist']);
     }
+
+    public function testTaskIndexRestriction(): void
+    {
+        $response = $this->getJson("/api/tasks");
+        $response->assertStatus(HttpStatusEnum::UNAUTHORIZED);
+    }
+
+    public function testTaskIndexListTasks(): void
+    {
+        $user = User::factory()->create();
+        Task::factory()->count(10)->create(['user_id' => $user->id]);
+
+        Sanctum::actingAs($user, ['*']);
+
+        $response = $this->getJson("/api/tasks");
+
+        $response->assertStatus(HttpStatusEnum::OK);
+        $response->assertJsonStructure(['data' => []]);
+        $response->assertJsonCount(10, 'data');
+    }
+
+    public function testTaskIndexListOnlyOwnedTasks()
+    {
+        $user = User::factory()->create();
+        Task::factory()->count(5)->create(['user_id' => $user->id]);
+        Task::factory()->count(5)->create();
+
+        Sanctum::actingAs($user, ['*']);
+
+        $response = $this->getJson("/api/tasks");
+
+        $response->assertStatus(HttpStatusEnum::OK);
+        $response->assertJsonCount(5, 'data');
+    }
 }
