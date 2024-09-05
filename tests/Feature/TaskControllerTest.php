@@ -152,4 +152,51 @@ class TaskControllerTest extends TestCase
         $response->assertStatus(HttpStatusEnum::NOT_FOUND);
         $response->assertJsonFragment(['message' => 'Task doesn\'t exist']);
     }
+
+    public function testTaskDestroyRestriction(): void
+    {
+        $task = Task::factory()->create();
+
+        $response = $this->deleteJson("/api/tasks/{$task->id}");
+        $response->assertStatus(HttpStatusEnum::UNAUTHORIZED);
+    }
+
+    public function testTaskDestroySubmission(): void
+    {
+        $user = User::factory()->create();
+        $task = Task::factory()->create(['user_id' => $user->id]);
+
+        Sanctum::actingAs($user, ['*']);
+
+        $response = $this->deleteJson("/api/tasks/{$task->id}");
+
+        $response->assertStatus(HttpStatusEnum::OK);
+        $response->assertJsonFragment(['message' => 'Task successfully deleted']);
+        $this->assertDatabaseCount(Task::class, 0);
+    }
+
+    public function testTaskDestroyNotOwner(): void
+    {
+        $user = User::factory()->create();
+        $task = Task::factory()->create();
+
+        Sanctum::actingAs($user, ['*']);
+
+        $response = $this->deleteJson("/api/tasks/{$task->id}");
+
+        $response->assertStatus(HttpStatusEnum::NOT_FOUND);
+        $response->assertJsonFragment(['message' => 'Task doesn\'t exist']);
+    }
+
+    public function testTaskDestroyInvalidTaskId(): void
+    {
+        $user = User::factory()->create();
+
+        Sanctum::actingAs($user, ['*']);
+
+        $response = $this->deleteJson("/api/tasks/123");
+
+        $response->assertStatus(HttpStatusEnum::NOT_FOUND);
+        $response->assertJsonFragment(['message' => 'Task doesn\'t exist']);
+    }
 }
