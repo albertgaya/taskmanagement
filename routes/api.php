@@ -19,8 +19,9 @@ use Illuminate\Support\Facades\Route;
 Route::post('/users/register', [UserController::class, 'register']);
 Route::post('/users/login', [UserController::class, 'login']);
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/tasks', [TaskController::class, 'store']);
-    Route::put('/tasks/{taskId}', [TaskController::class, 'update']);
-    Route::delete('/tasks/{taskId}', [TaskController::class, 'destroy']);
+Route::middleware('auth:sanctum')->prefix('tasks')->group(function () {
+    Route::post('/', [TaskController::class, 'store']);
+    Route::put('/{taskId}', [TaskController::class, 'update']);
+    Route::delete('/{taskId}', [TaskController::class, 'destroy']);
+    Route::get('/', [TaskController::class, 'index']);
 });

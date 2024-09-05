@@ -74,4 +74,17 @@ class TaskController extends Controller
 
         return response()->json(['message' => 'Task successfully deleted']);
     }
+
+    /**
+     * @return JsonResponse
+     */
+    public function index(): JsonResponse
+    {
+        /** @var User */
+        $user = Auth::user();
+
+        $tasks = $this->taskService->getUserTasks($user);
+
+        return response()->json(['data' => $tasks]);
+    }
 }

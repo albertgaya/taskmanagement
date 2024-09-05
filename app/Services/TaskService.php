@@ -3,6 +3,7 @@
 namespace App\Services;
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Support\Collection;
 
 class TaskService
 {
@@ -43,5 +44,14 @@ class TaskService
     public function getUserSingleTask(User $user, int $taskId): ?Task
     {
         return Task::where('user_id', $user->id)->where('id', $taskId)->first();
+    }
+
+    /**
+     * @param User $user
+     * @return Collection
+     */
+    public function getUserTasks(User $user): Collection
+    {
+        return Task::where('user_id', $user->id)->get();
     }
 }
