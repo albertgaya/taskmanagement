@@ -233,4 +233,24 @@ class TaskControllerTest extends TestCase
         $response->assertStatus(HttpStatusEnum::OK);
         $response->assertJsonCount(5, 'data');
     }
+
+    public function testTaskIndexListUsingTaskResource()
+    {
+        $user = User::factory()->create();
+        Task::factory()->create(['user_id' => $user->id]);
+
+        Sanctum::actingAs($user, ['*']);
+
+        $response = $this->getJson("/api/tasks");
+
+        $response->assertStatus(HttpStatusEnum::OK);
+        $data = current($response->json('data'));
+
+        $this->assertCount(5, $data);
+        $this->assertArrayHasKey('id', $data);
+        $this->assertArrayHasKey('title', $data);
+        $this->assertArrayHasKey('description', $data);
+        $this->assertArrayHasKey('status', $data);
+        $this->assertArrayHasKey('due_date', $data);
+    }
 }

@@ -6,6 +6,7 @@ use App\Enums\HttpStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TaskStoreRequest;
 use App\Http\Requests\TaskUpdateRequest;
+use App\Http\Resources\TaskResource;
 use App\Services\TaskService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -85,6 +86,6 @@ class TaskController extends Controller
 
         $tasks = $this->taskService->getUserTasks($user);
 
-        return response()->json(['data' => $tasks]);
+        return response()->json(['data' => TaskResource::collection($tasks)]);
     }
 }
